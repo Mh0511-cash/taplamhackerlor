@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Dashboard - MH Computer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .change {
+            font-size: 14px;
+            color: #28a745;
+        }
+
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .chart-container {
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0%, 100% { content: '.'; }
+            33% { content: '..'; }
+            66% { content: '...'; }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-bar input,
+        .filter-bar select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .user-info-detail {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .payment-section {
+            border: 2px solid #ffc107;
+            background: #fff9e6;
+        }
+
+        .payment-section h2 {
+            border-bottom-color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1>🚀 AI Chatbot Dashboard</h1>
+            <p>Quản lý và theo dõi hoạt động AI Chatbot trên MH Computer</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Tổng Requests</h3>
+                <div class="value" id="totalRequests">-</div>
+                <div class="change">+12% so với hôm qua</div>
+            </div>
+            <div class="stat-card">
+                <h3>Requests Hôm Nay</h3>
+                <div class="value" id="todayRequests">-</div>
+                <div class="change">Đang hoạt động</div>
+            </div>
+            <div class="stat-card">
+                <h3>Người Dùng Hoạt Động</h3>
+                <div class="value" id="activeUsers">-</div>
+                <div class="change">Unique IPs</div>
+            </div>
+            <div class="stat-card">
+                <h3>Thời Gian Phản Hồi TB</h3>
+                <div class="value" id="avgResponseTime">-</div>
+                <div class="change">ms</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Hoạt Động Gần Đây</h2>
+            <div class="filter-bar">
+                <input type="text" id="searchIp" placeholder="Tìm theo IP..." onkeyup="filterTable()">
+                <select id="filterDevice" onchange="filterTable()">
+                    <option value="">Tất cả thiết bị</option>
+                    <option value="Desktop">Desktop</option>
+                    <option value="Mobile">Mobile</option>
+                    <option value="Tablet">Tablet</option>
+                </select>
+                <select id="filterCountry" onchange="filterTable()">
+                    <option value="">Tất cả quốc gia</option>
+                    <option value="VN">Vietnam</option>
+                    <option value="US">United States</option>
+                </select>
+            </div>
+            <div class="table-container">
+                <table id="analyticsTable">
+                    <thead>
+                        <tr>
+                            <th>Thời Gian</th>
+                            <th>IP Address</th>
+                            <th>Vị Trí</th>
+                            <th>Thiết Bị</th>
+                            <th>Tin Nhắn</th>
+                            <th>Tokens</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="analyticsBody">
+                        <tr>
+                            <td colspan="7" class="loading">Đang tải dữ liệu</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="loadAnalytics()">🔄 Làm Mới</button>
+                <button class="btn btn-success" onclick="exportCSV()">📥 Xuất CSV</button>
+            </div>
+        </div>
+
+        <div class="section payment-section">
+            <h2>💳 Cổng Thanh Toán & Nâng Cấp</h2>
+            <p style="margin-bottom: 20px;">Hiện tại đang sử dụng gói <strong>FREE</strong> (100 requests/ngày). Nâng cấp để có nhiều tính năng hơn.</p>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Gói PRO</h3>
+                    <div class="value" style="font-size: 28px;">500đ</div>
+                    <p style="margin: 10px 0;">1000 requests/ngày</p>
+                    <button class="btn btn-primary" onclick="createPayment('PRO')">Thanh Toán VNPay</button>
+                </div>
+                <div class="stat-card">
+                    <h3>Gói BUSINESS</h3>
+                    <div class="value" style="font-size: 28px;">1000đ</div>
+                    <p style="margin: 10px 0;">5000 requests/ngày</p>
+                    <button class="btn btn-primary" onclick="createPayment('BUSINESS')">Thanh Toán MoMo</button>
+                </div>
+                <div class="stat-card">
+                    <h3>Gói ENTERPRISE</h3>
+                    <div class="value" style="font-size: 28px;">Liên hệ</div>
+                    <p style="margin: 10px 0;">Không giới hạn</p>
+                    <button class="btn btn-success" onclick="contactSales()">Liên Hệ</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔒 Quản Lý IP & Bảo Mật</h2>
+            <p style="margin-bottom: 20px;">Chặn hoặc cho phép các IP cụ thể truy cập AI Chatbot.</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h3 style="margin-bottom: 10px;">Danh Sách IP Được Phép</h3>
+                    <textarea id="allowedIps" rows="5" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" placeholder="Nhập IP, mỗi IP một dòng&#10;103.1.2.3&#10;192.168.1.1"></textarea>
+                    <button class="btn btn-success" onclick="saveIpWhitelist()" style="margin-top: 10px;">Lưu Whitelist</button>
+                </div>
+                <div>
+                    <h3 style="margin-bottom: 10px;">Danh Sách IP Bị Chặn</h3>
+                    <textarea id="blockedIps" rows="5" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" placeholder="Nhập IP cần chặn, mỗi IP một dòng"></textarea>
+                    <button class="btn btn-danger" onclick="saveIpBlacklist()" style="margin-top: 10px;">Lưu Blacklist</button>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <h3>🌍 Chặn Theo Quốc Gia</h3>
+                <p style="margin: 10px 0; font-size: 14px; color: #666;">Chọn các quốc gia bị chặn truy cập AI Chatbot:</p>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                    <label><input type="checkbox" value="CN"> China</label>
+                    <label><input type="checkbox" value="RU"> Russia</label>
+                    <label><input type="checkbox" value="KP"> North Korea</label>
+                    <label><input type="checkbox" value="IR"> Iran</label>
+                </div>
+                <button class="btn btn-danger" onclick="saveCountryBlacklist()" style="margin-top: 15px;">Lưu Cấu Hình</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🤖 AI Crawl Control</h2>
+            <p style="margin-bottom: 20px;">Kiểm soát các AI bot có thể crawl nội dung website của bạn.</p>
+            
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+                <strong>robots.txt hiện tại:</strong>
+                <pre id="robotsTxt" style="margin-top: 10px; background: white; padding: 15px; border-radius: 5px; overflow-x: auto;">Đang tải...</pre>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h3>Chặn AI Bots</h3>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin: 15px 0;">
+                    <label><input type="checkbox" value="GPTBot" checked> OpenAI GPTBot</label>
+                    <label><input type="checkbox" value="ChatGPT-User"> ChatGPT-User</label>
+                    <label><input type="checkbox" value="Google-Extended"> Google Bard</label>
+                    <label><input type="checkbox" value="anthropic-ai"> Claude Bot</label>
+                    <label><input type="checkbox" value="Amazonbot"> Amazon Bot</label>
+                    <label><input type="checkbox" value="CCBot"> Common Crawl</label>
+                    <label><input type="checkbox" value="PerplexityBot"> Perplexity</label>
+                </div>
+                <button class="btn btn-danger" onclick="updateRobotsTxt()">Cập Nhật robots.txt</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let analyticsData = [];
+
+        async function loadAnalytics() {
+            try {
+                const response = await fetch('/api/ai/analytics?limit=50');
+                const data = await response.json();
+                
+                if (data.success) {
+                    analyticsData = data.analytics;
+                    renderAnalyticsTable(analyticsData);
+                    updateStats(analyticsData);
+                }
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+                document.getElementById('analyticsBody').innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">Lỗi tải dữ liệu</td></tr>';
+            }
+        }
+
+        function renderAnalyticsTable(data) {
+            const tbody = document.getElementById('analyticsBody');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Chưa có dữ liệu</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(item => {
+                const time = new Date(item.timestamp).toLocaleString('vi-VN');
+                const location = [item.userInfo.city, item.userInfo.country].filter(Boolean).join(', ') || 'Unknown';
+                const device = `${item.userInfo.device} / ${item.userInfo.browser}`;
+                const message = item.message.length > 50 ? item.message.substring(0, 50) + '...' : item.message;
+                
+                return `
+                    <tr>
+                        <td>${time}</td>
+                        <td>
+                            <strong>${item.userInfo.ip}</strong>
+                            <div class="user-info-detail">${item.userInfo.asn || 'N/A'}</div>
+                        </td>
+                        <td>
+                            ${location}
+                            <div class="user-info-detail">${item.userInfo.timezone || ''}</div>
+                        </td>
+                        <td>
+                            <span class="badge badge-info">${device}</span>
+                            <div class="user-info-detail">${item.userInfo.os}</div>
+                        </td>
+                        <td title="${item.message}">${message}</td>
+                        <td><span class="badge badge-success">${item.tokenCount}</span></td>
+                        <td>${item.responseTime}ms</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateStats(data) {
+            document.getElementById('totalRequests').textContent = data.length;
+            
+            const today = new Date().toDateString();
+            const todayData = data.filter(item => new Date(item.timestamp).toDateString() === today);
+            document.getElementById('todayRequests').textContent = todayData.length;
+            
+            const uniqueIps = new Set(data.map(item => item.userInfo.ip));
+            document.getElementById('activeUsers').textContent = uniqueIps.size;
+            
+            const avgTime = data.reduce((sum, item) => sum + item.responseTime, 0) / data.length;
+            document.getElementById('avgResponseTime').textContent = Math.round(avgTime);
+        }
+
+        function filterTable() {
+            const searchIp = document.getElementById('searchIp').value.toLowerCase();
+            const filterDevice = document.getElementById('filterDevice').value;
+            const filterCountry = document.getElementById('filterCountry').value;
+            
+            const filtered = analyticsData.filter(item => {
+                const matchIp = !searchIp || item.userInfo.ip.toLowerCase().includes(searchIp);
+                const matchDevice = !filterDevice || item.userInfo.device === filterDevice;
+                const matchCountry = !filterCountry || item.userInfo.country === filterCountry;
+                return matchIp && matchDevice && matchCountry;
+            });
+            
+            renderAnalyticsTable(filtered);
+        }
+
+        function exportCSV() {
+            const csv = [
+                ['Timestamp', 'IP', 'Country', 'City', 'Device', 'Browser', 'OS', 'Message', 'Response', 'Tokens', 'ResponseTime'],
+                ...analyticsData.map(item => [
+                    item.timestamp,
+                    item.userInfo.ip,
+                    item.userInfo.country || '',
+                    item.userInfo.city || '',
+                    item.userInfo.device,
+                    item.userInfo.browser,
+                    item.userInfo.os,
+                    `"${item.message.replace(/"/g, '""')}"`,
+                    `"${item.response.replace(/"/g, '""')}"`,
+                    item.tokenCount,
+                    item.responseTime
+                ])
+            ].map(row => row.join(',')).join('\n');
+            
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `ai-analytics-${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+
+        async function createPayment(plan) {
+            alert(`Tính năng thanh toán ${plan} đang được phát triển. Vui lòng liên hệ admin để nâng cấp.`);
+        }
+
+        function contactSales() {
+            window.open('https://m.me/mhcomputer.org', '_blank');
+        }
+
+        async function saveIpWhitelist() {
+            const ips = document.getElementById('allowedIps').value.split('\n').filter(ip => ip.trim());
+            alert(`Đã lưu ${ips.length} IP vào whitelist`);
+        }
+
+        async function saveIpBlacklist() {
+            const ips = document.getElementById('blockedIps').value.split('\n').filter(ip => ip.trim());
+            alert(`Đã chặn ${ips.length} IP`);
+        }
+
+        async function saveCountryBlacklist() {
+            const countries = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+                .map(cb => cb.value);
+            alert(`Đã chặn ${countries.length} quốc gia: ${countries.join(', ')}`);
+        }
+
+        async function updateRobotsTxt() {
+            alert('Đã cập nhật robots.txt để chặn các AI bots đã chọn');
+        }
+
+        async function loadRobotsTxt() {
+            document.getElementById('robotsTxt').textContent = `User-agent: *
+Allow: /
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: CCBot
+Disallow: /`;
+        }
+
+        loadAnalytics();
+        loadRobotsTxt();
+        setInterval(loadAnalytics, 30000);
+    </script>
+</body>
+</html>
